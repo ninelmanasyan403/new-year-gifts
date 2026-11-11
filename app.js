@@ -725,8 +725,8 @@ function pigSvg(outfit) {
     front = '<path d="M30 98h80c-4 8-14 12-26 12H54c-12 0-20-4-24-12z" fill="#2f6b4f"/>' +
       '<path d="M46 104h18" stroke="#e3b45a" stroke-width="3" stroke-linecap="round"/>';
   } else if (outfit === "sweater") {
-    behind = '<path d="M24 112h92v22c-12 10-32 14-46 14s-34-4-46-14z" fill="#7dcea0"/>' +
-      '<path d="M70 122l3 5 5 1-4 3 1 5-5-3-5 3 1-5-4-3 5-1z" fill="#fff"/>';
+    behind = '<path d="M30 134c8 3 16 5 40 5s32-2 40-5v14c-10 10-24 14-40 14s-30-4-40-14z" fill="#7dcea0"/>' +
+      '<path d="M70 146l2 3.4 3.8.5-3 2.6.8 3.8-3.6-2.2-3.6 2.2.8-3.8-3-2.6 3.8-.5z" fill="#fff"/>';
   } else if (outfit === "bow") {
     front = '<path d="M96 50c8-12 22-8 22 2s-14 12-22 2c-8 10-22 8-22-2s14-14 22-2z" fill="#d4536a"/>' +
       '<circle cx="96" cy="52" r="4" fill="#f2c14e"/>';
