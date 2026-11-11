@@ -12,24 +12,33 @@
 </head>
 <body>
   <div class="snow" aria-hidden="true"></div>
-  <div class="garland" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span>
-  </div>
+  <div class="pig-scene" id="pig-scene" aria-hidden="true"></div>
 
-  <header class="hero">
-    <p class="eyebrow">Новый год 2027</p>
-    <h1>Подарки сотрудникам</h1>
-    <p class="lede">Откройте компанию, выберите вещи и напишите количество — корзина и сумма посчитаются сами. У каждой компании свой калькулятор.</p>
-  </header>
+  <div class="first-screen">
+    <div class="garland" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span>
+    </div>
 
-  <main>
+    <header class="hero">
+      <p class="eyebrow">Новый год 2027</p>
+      <h1>Подарки сотрудникам</h1>
+      <p class="lede">Откройте компанию, выберите вещи и напишите количество — корзина и сумма посчитаются сами. У каждой компании свой калькулятор.</p>
+    </header>
+
     <section class="companies" aria-labelledby="companies-title">
       <h2 id="companies-title">Компании</h2>
       <div id="company-grid" class="company-grid"></div>
     </section>
 
+    <button type="button" class="oink-pig" id="oink-pig" aria-label="Нажмите, свинка похрюкает">
+      <span class="oink-word">хрю!</span>
+      <span class="oink-hint">нажми</span>
+    </button>
+  </div>
+
+  <main>
     <section class="budget" aria-labelledby="budget-title">
       <div class="budget-head">
         <h2 id="budget-title">Общий расчёт</h2>

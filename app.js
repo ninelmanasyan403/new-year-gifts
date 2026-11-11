@@ -712,6 +712,152 @@ document.getElementById("cart-options").addEventListener("change", function (eve
 
 document.getElementById("copy-all").addEventListener("click", copySummary);
 
+function pigSvg(outfit) {
+  var behind = "";
+  var front = "";
+  if (outfit === "santa") {
+    front = '<path d="M36 64c6-34 58-48 78-16 2 8-18 8-24 2-6 16-40 16-54 14z" fill="#d4536a"/>' +
+      '<ellipse cx="72" cy="66" rx="34" ry="8" fill="#fff"/>' +
+      '<circle cx="112" cy="44" r="9" fill="#fff"/>';
+  } else if (outfit === "scarf") {
+    behind = '<path d="M78 108c10 4 16 22 8 40" fill="none" stroke="#2f6b4f" stroke-width="10" stroke-linecap="round"/>' +
+      '<circle cx="84" cy="146" r="5" fill="#e3b45a"/>';
+    front = '<path d="M30 98h80c-4 8-14 12-26 12H54c-12 0-20-4-24-12z" fill="#2f6b4f"/>' +
+      '<path d="M46 104h18" stroke="#e3b45a" stroke-width="3" stroke-linecap="round"/>';
+  } else if (outfit === "sweater") {
+    behind = '<path d="M24 112h92v22c-12 10-32 14-46 14s-34-4-46-14z" fill="#7dcea0"/>' +
+      '<path d="M70 122l3 5 5 1-4 3 1 5-5-3-5 3 1-5-4-3 5-1z" fill="#fff"/>';
+  } else if (outfit === "bow") {
+    front = '<path d="M96 50c8-12 22-8 22 2s-14 12-22 2c-8 10-22 8-22-2s14-14 22-2z" fill="#d4536a"/>' +
+      '<circle cx="96" cy="52" r="4" fill="#f2c14e"/>';
+  } else if (outfit === "muffs") {
+    front = '<path d="M38 62c12-16 52-16 64 0" fill="none" stroke="#e3b45a" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="36" cy="68" r="11" fill="#f48fa3" stroke="#fff" stroke-width="4"/>' +
+      '<circle cx="104" cy="68" r="11" fill="#f48fa3" stroke="#fff" stroke-width="4"/>';
+  }
+  return '<svg class="pig-svg" viewBox="0 0 140 156">' +
+    behind +
+    '<ellipse cx="42" cy="58" rx="14" ry="18" fill="#f3a7b5" transform="rotate(-28 42 58)"/>' +
+    '<ellipse cx="98" cy="58" rx="14" ry="18" fill="#f3a7b5" transform="rotate(28 98 58)"/>' +
+    '<ellipse cx="44" cy="60" rx="7" ry="11" fill="#ffd5de" transform="rotate(-28 44 60)"/>' +
+    '<ellipse cx="96" cy="60" rx="7" ry="11" fill="#ffd5de" transform="rotate(28 96 60)"/>' +
+    '<ellipse cx="70" cy="90" rx="48" ry="42" fill="#f7b7c3"/>' +
+    '<ellipse cx="70" cy="102" rx="22" ry="15" fill="#f48fa3"/>' +
+    '<ellipse cx="62" cy="102" rx="3.6" ry="5" fill="#b94b63"/>' +
+    '<ellipse cx="78" cy="102" rx="3.6" ry="5" fill="#b94b63"/>' +
+    '<ellipse cx="52" cy="82" rx="4.6" ry="6" fill="#4a2c32"/>' +
+    '<ellipse cx="88" cy="82" rx="4.6" ry="6" fill="#4a2c32"/>' +
+    '<circle cx="53.5" cy="80" r="1.6" fill="#fff"/>' +
+    '<circle cx="89.5" cy="80" r="1.6" fill="#fff"/>' +
+    '<ellipse cx="40" cy="94" rx="7" ry="4" fill="#f07a90" opacity="0.5"/>' +
+    '<ellipse cx="100" cy="94" rx="7" ry="4" fill="#f07a90" opacity="0.5"/>' +
+    '<path d="M61 112q9 8 18 0" fill="none" stroke="#b94b63" stroke-width="2.4" stroke-linecap="round"/>' +
+    front +
+    "</svg>";
+}
+
+function spawnPigs() {
+  var scene = document.getElementById("pig-scene");
+  var pigs = [
+    { outfit: "santa", style: "left:1%; top:14%; --tilt:-8deg;" },
+    { outfit: "scarf", style: "right:1%; top:28%; --tilt:8deg; animation-delay:-1.4s;", size: "wide" },
+    { outfit: "sweater", style: "left:2%; bottom:6%; --tilt:-4deg; animation-delay:-2.2s;" },
+    { outfit: "bow", style: "right:3%; bottom:10%; --tilt:7deg; animation-delay:-3s;", size: "small" },
+    { outfit: "muffs", style: "left:16%; top:4%; --tilt:-10deg; animation-delay:-0.8s;", size: "small" },
+    { outfit: "santa", style: "right:18%; top:2%; --tilt:6deg; animation-delay:-2.8s;", size: "small" }
+  ];
+  var hearts = [
+    { style: "left:10%; top:42%; font-size:22px;" },
+    { style: "left:22%; top:18%; font-size:14px; animation-delay:-1s;", gold: true },
+    { style: "right:12%; top:16%; font-size:20px; animation-delay:-2s;" },
+    { style: "right:20%; top:48%; font-size:16px; animation-delay:-1.5s;", gold: true },
+    { style: "left:8%; bottom:28%; font-size:18px; animation-delay:-3s;" },
+    { style: "right:8%; bottom:32%; font-size:24px; animation-delay:-0.6s;" },
+    { style: "left:46%; top:8%; font-size:13px; animation-delay:-2.4s;", gold: true },
+    { style: "left:38%; bottom:8%; font-size:16px; animation-delay:-1.8s;" },
+    { style: "left:30%; top:36%; font-size:18px; animation-delay:-0.4s;" },
+    { style: "right:28%; top:34%; font-size:15px; animation-delay:-2.2s;", gold: true },
+    { style: "left:18%; bottom:18%; font-size:12px; animation-delay:-1.2s;", gold: true },
+    { style: "right:16%; bottom:22%; font-size:20px; animation-delay:-3.2s;" },
+    { style: "left:52%; bottom:16%; font-size:14px; animation-delay:-0.9s;" },
+    { style: "right:36%; bottom:12%; font-size:17px; animation-delay:-1.7s;", gold: true }
+  ];
+  pigs.forEach(function (pig) {
+    var node = document.createElement("div");
+    node.className = "deco-pig" + (pig.size ? " " + pig.size : "");
+    node.style.cssText = pig.style;
+    node.innerHTML = pigSvg(pig.outfit);
+    scene.appendChild(node);
+  });
+  hearts.forEach(function (heart) {
+    var node = document.createElement("span");
+    node.className = "float-heart" + (heart.gold ? " gold" : "");
+    node.style.cssText = heart.style;
+    node.textContent = "♥";
+    scene.appendChild(node);
+  });
+}
+
+var oinkContext = null;
+
+function playOink() {
+  var AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  if (!oinkContext) oinkContext = new AudioCtx();
+  if (oinkContext.state === "suspended") oinkContext.resume();
+  grunt(oinkContext.currentTime, 240, 0.16);
+  grunt(oinkContext.currentTime + 0.2, 300, 0.14);
+}
+
+function grunt(start, base, duration) {
+  var osc = oinkContext.createOscillator();
+  var tone = oinkContext.createGain();
+  var filter = oinkContext.createBiquadFilter();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(base * 1.8, start);
+  osc.frequency.exponentialRampToValueAtTime(base * 0.62, start + duration);
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(1800, start);
+  filter.frequency.exponentialRampToValueAtTime(420, start + duration);
+  tone.gain.setValueAtTime(0.0001, start);
+  tone.gain.exponentialRampToValueAtTime(0.22, start + 0.025);
+  tone.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(filter);
+  filter.connect(tone);
+  tone.connect(oinkContext.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+
+function burstHearts(button) {
+  for (var i = 0; i < 10; i += 1) {
+    var heart = document.createElement("i");
+    var angle = (Math.PI * 2 * i) / 10;
+    var distance = 46 + (i % 3) * 16;
+    heart.className = "burst-heart";
+    heart.textContent = i % 2 === 0 ? "♥" : "♡";
+    heart.style.setProperty("--dx", Math.cos(angle) * distance + "px");
+    heart.style.setProperty("--dy", Math.sin(angle) * distance + "px");
+    button.appendChild(heart);
+    window.setTimeout(function (node) { node.remove(); }, 820, heart);
+  }
+}
+
+function bindOink() {
+  var button = document.getElementById("oink-pig");
+  button.insertAdjacentHTML("afterbegin", pigSvg("santa"));
+  button.addEventListener("click", function () {
+    button.classList.remove("is-glowing");
+    void button.offsetWidth;
+    button.classList.add("is-glowing");
+    burstHearts(button);
+    playOink();
+    window.setTimeout(function () { button.classList.remove("is-glowing"); }, 900);
+  });
+}
+
 spawnSnow();
+spawnPigs();
+bindOink();
 renderCompanies();
 renderBudget();
