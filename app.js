@@ -1,0 +1,717 @@
+const STORAGE_KEY = "ny-gifts-2027";
+const money = new Intl.NumberFormat("ru-RU", {
+  style: "currency",
+  currency: "RUB",
+  maximumFractionDigits: 0
+});
+
+const state = loadState();
+const shop = document.getElementById("shop");
+let activeCompanyId = null;
+let clearArmed = false;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function companyById(id) {
+  for (let i = 0; i < COMPANIES.length; i += 1) {
+    if (COMPANIES[i].id === id) return COMPANIES[i];
+  }
+  return null;
+}
+
+function productById(company, productId) {
+  for (let i = 0; i < company.products.length; i += 1) {
+    if (company.products[i].id === productId) return company.products[i];
+  }
+  return null;
+}
+
+function ensureBag(companyId) {
+  const current = state[companyId];
+  if (current && current.items && typeof current.items === "object") {
+    if (!current.sheets) current.sheets = {};
+    if (!current.flags) current.flags = {};
+    if (typeof current.delivery !== "boolean") current.delivery = false;
+    return current;
+  }
+  const items = {};
+  if (current && typeof current === "object") {
+    Object.keys(current).forEach(function (key) {
+      if (typeof current[key] === "number" && current[key] > 0) items[key] = current[key];
+    });
+  }
+  state[companyId] = { items: items, sheets: {}, delivery: false, flags: {} };
+  return state[companyId];
+}
+
+function qtyOf(companyId, productId) {
+  const value = ensureBag(companyId).items[productId];
+  return typeof value === "number" && value > 0 ? value : 0;
+}
+
+function sheetChoice(company, product) {
+  if (!product.sheets || !product.sheets.length) return null;
+  const chosen = ensureBag(company.id).sheets[product.id];
+  for (let i = 0; i < product.sheets.length; i += 1) {
+    if (product.sheets[i].count === chosen) return product.sheets[i];
+  }
+  return product.sheets[0];
+}
+
+function unitPrice(company, product) {
+  const sheet = sheetChoice(company, product);
+  return sheet ? sheet.price : product.price;
+}
+
+function lineLabel(company, product) {
+  const sheet = sheetChoice(company, product);
+  if (!sheet) return product.name;
+  return product.name + ", " + sheet.count + (sheet.count === 1 ? " лист" : " листа");
+}
+
+function deliveryOn(company) {
+  return Boolean(company.delivery && ensureBag(company.id).delivery);
+}
+
+function activeFlags(company) {
+  const flags = [];
+  if (!company.flags) return flags;
+  const bag = ensureBag(company.id);
+  for (let i = 0; i < company.flags.length; i += 1) {
+    if (bag.flags[company.flags[i].id]) flags.push(company.flags[i]);
+  }
+  return flags;
+}
+
+function itemsLabel(count) {
+  const mod100 = count % 100;
+  const mod10 = count % 10;
+  if (mod100 > 10 && mod100 < 20) return count + " товаров";
+  if (mod10 === 1) return count + " товар";
+  if (mod10 > 1 && mod10 < 5) return count + " товара";
+  return count + " товаров";
+}
+
+function companyTotal(company) {
+  let sum = 0;
+  let itemCount = 0;
+  for (let i = 0; i < company.products.length; i += 1) {
+    const qty = qtyOf(company.id, company.products[i].id);
+    if (qty > 0) {
+      sum += qty * unitPrice(company, company.products[i]);
+      itemCount += 1;
+    }
+  }
+  const withDelivery = deliveryOn(company);
+  if (withDelivery) sum += company.delivery.price;
+  const flags = activeFlags(company);
+  return {
+    sum: sum,
+    itemCount: itemCount,
+    delivery: withDelivery,
+    flagCount: flags.length,
+    count: itemCount + (withDelivery ? 1 : 0) + flags.length
+  };
+}
+
+function grandTotal() {
+  let sum = 0;
+  for (let i = 0; i < COMPANIES.length; i += 1) {
+    sum += companyTotal(COMPANIES[i]).sum;
+  }
+  return sum;
+}
+
+function parseQty(value) {
+  const digits = String(value).replace(/[^\d]/g, "");
+  if (!digits) return 0;
+  return Math.min(100000, parseInt(digits, 10));
+}
+
+function setQty(productId, rawValue, source) {
+  const company = companyById(activeCompanyId);
+  if (!company) return;
+  const product = productById(company, productId);
+  if (!product) return;
+  let qty = parseQty(rawValue);
+  if (product.once) qty = qty > 0 ? 1 : 0;
+  const bag = ensureBag(company.id);
+  if (qty > 0) bag.items[productId] = qty;
+  else delete bag.items[productId];
+  saveState();
+  syncProduct(company, product, source);
+  syncCartRow(company, product);
+  updateCartSummary(company);
+  refreshCompanyMeta(company);
+  renderBudget();
+}
+
+function spawnSnow() {
+  const layer = document.querySelector(".snow");
+  for (let i = 0; i < 26; i += 1) {
+    const flake = document.createElement("i");
+    flake.style.left = Math.random() * 100 + "%";
+    flake.style.animationDuration = 8 + Math.random() * 12 + "s";
+    flake.style.animationDelay = -Math.random() * 16 + "s";
+    flake.style.opacity = String(0.35 + Math.random() * 0.55);
+    const size = 4 + Math.random() * 7;
+    flake.style.width = size + "px";
+    flake.style.height = size + "px";
+    layer.appendChild(flake);
+  }
+}
+
+function renderCompanies() {
+  const root = document.getElementById("company-grid");
+  root.replaceChildren();
+  COMPANIES.forEach(function (company) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "company";
+    button.dataset.fit = company.logoFit;
+    button.addEventListener("click", function () { openCompany(company.id); });
+
+    const image = document.createElement("img");
+    image.src = company.logo;
+    image.alt = "Логотип " + company.name;
+
+    const name = document.createElement("span");
+    name.className = "company-name";
+    name.textContent = company.name;
+
+    const meta = document.createElement("span");
+    meta.className = "company-meta";
+    meta.dataset.meta = company.id;
+
+    button.append(image, name, meta);
+    root.appendChild(button);
+    refreshCompanyMeta(company);
+  });
+}
+
+function refreshCompanyMeta(company) {
+  const meta = document.querySelector('[data-meta="' + company.id + '"]');
+  if (!meta) return;
+  const totals = companyTotal(company);
+  if (!totals.count) {
+    meta.textContent = "Корзина пуста";
+    return;
+  }
+  const bits = [];
+  if (totals.itemCount) bits.push(itemsLabel(totals.itemCount));
+  if (totals.delivery) bits.push("доставка");
+  if (totals.flagCount) {
+    activeFlags(company).forEach(function (flag) { bits.push(flag.name); });
+  }
+  const tail = totals.itemCount || totals.delivery ? money.format(totals.sum) : "цену уточнить";
+  meta.textContent = bits.join(", ") + " · " + tail;
+}
+
+function renderBudget() {
+  const list = document.getElementById("budget-list");
+  list.replaceChildren();
+  COMPANIES.forEach(function (company) {
+    const card = document.createElement("article");
+    card.className = "budget-card";
+    const title = document.createElement("h3");
+    title.textContent = company.name;
+    const items = document.createElement("ul");
+    company.products.forEach(function (product) {
+      const qty = qtyOf(company.id, product.id);
+      if (qty <= 0) return;
+      const row = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = product.once
+        ? lineLabel(company, product) + ", весь тираж"
+        : lineLabel(company, product) + " × " + qty;
+      const value = document.createElement("span");
+      value.textContent = money.format(qty * unitPrice(company, product));
+      row.append(label, value);
+      items.appendChild(row);
+    });
+    if (deliveryOn(company)) {
+      const row = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = company.delivery.name;
+      const value = document.createElement("span");
+      value.textContent = money.format(company.delivery.price);
+      row.append(label, value);
+      items.appendChild(row);
+    }
+    activeFlags(company).forEach(function (flag) {
+      const row = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = flag.name;
+      const value = document.createElement("span");
+      value.textContent = "цену уточнить";
+      row.append(label, value);
+      items.appendChild(row);
+    });
+    const subtotal = document.createElement("p");
+    subtotal.className = "subtotal";
+    const totals = companyTotal(company);
+    if (!totals.count) {
+      const empty = document.createElement("p");
+      empty.className = "muted";
+      empty.textContent = "Пока ничего не выбрано";
+      card.append(title, empty);
+    } else {
+      subtotal.textContent = "Итого: " + money.format(totals.sum);
+      card.append(title, items, subtotal);
+    }
+    list.appendChild(card);
+  });
+  document.getElementById("grand-total").textContent = "Общий бюджет: " + money.format(grandTotal());
+}
+
+function openCompany(companyId) {
+  activeCompanyId = companyId;
+  clearArmed = false;
+  const company = companyById(companyId);
+  const logo = document.getElementById("shop-logo");
+  logo.src = company.logo;
+  logo.alt = "";
+  logo.style.objectFit = company.logoFit;
+  document.getElementById("shop-kicker").textContent = "Витрина";
+  document.getElementById("shop-title").textContent = company.name;
+  document.getElementById("shop-tagline").textContent = company.tagline;
+  document.getElementById("clear-cart").textContent = "Очистить";
+  renderProducts(company);
+  renderCart(company);
+  document.body.classList.add("modal-open");
+  if (!shop.open) shop.showModal();
+}
+
+function renderProducts(company) {
+  const grid = document.getElementById("shop-grid");
+  grid.replaceChildren();
+  if (company.notes && company.notes.length) {
+    const notes = document.createElement("div");
+    notes.className = "shop-notes";
+    const heading = document.createElement("p");
+    heading.className = "shop-notes-title";
+    heading.textContent = "Условия";
+    const list = document.createElement("ul");
+    company.notes.forEach(function (text) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      list.appendChild(item);
+    });
+    notes.append(heading, list);
+    grid.appendChild(notes);
+  }
+  company.products.forEach(function (product) {
+    const card = document.createElement("article");
+    card.className = "product";
+    card.dataset.product = product.id;
+
+    if (product.image) {
+      const photo = document.createElement("img");
+      photo.className = "product-photo";
+      photo.src = product.image;
+      photo.alt = product.name;
+      card.appendChild(photo);
+    } else if (product.kind) {
+      const art = document.createElement("div");
+      art.className = "product-art";
+      art.innerHTML = productArt(company.id, product.kind);
+      card.appendChild(art);
+    } else {
+      const blank = document.createElement("div");
+      blank.className = "product-blank";
+      blank.textContent = "Без фото";
+      card.appendChild(blank);
+    }
+
+    const title = document.createElement("h3");
+    title.textContent = product.name;
+    card.appendChild(title);
+
+    if (product.note) {
+      const note = document.createElement("p");
+      note.className = "product-note";
+      note.textContent = product.note;
+      card.appendChild(note);
+    }
+
+    if (!product.sheets) {
+      const price = document.createElement("p");
+      price.className = "price";
+      price.textContent = money.format(product.price);
+      card.appendChild(price);
+    }
+
+    if (product.sheets) {
+      const variants = document.createElement("div");
+      variants.className = "variants";
+      product.sheets.forEach(function (tier) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "variant";
+        button.dataset.sheets = String(tier.count);
+        button.dataset.product = product.id;
+        const sheetWord = tier.count === 1 ? "лист" : "листа";
+        button.textContent = tier.count + " " + sheetWord + " · " + money.format(tier.price);
+        variants.appendChild(button);
+      });
+      card.appendChild(variants);
+    }
+
+    if (product.qtyLabel) {
+      const qtyLabel = document.createElement("p");
+      qtyLabel.className = "qty-label";
+      qtyLabel.textContent = product.qtyLabel;
+      card.appendChild(qtyLabel);
+    }
+
+    const qty = document.createElement("div");
+    qty.className = "qty";
+    const minus = document.createElement("button");
+    minus.type = "button";
+    minus.className = "step";
+    minus.dataset.step = "-1";
+    minus.dataset.qty = product.id;
+    minus.textContent = "−";
+    minus.setAttribute("aria-label", "Меньше");
+    const input = document.createElement("input");
+    input.dataset.qty = product.id;
+    input.inputMode = "numeric";
+    input.setAttribute("aria-label", "Количество: " + product.name);
+    input.placeholder = "0";
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.className = "step";
+    plus.dataset.step = "1";
+    plus.dataset.qty = product.id;
+    plus.textContent = "+";
+    plus.setAttribute("aria-label", "Больше");
+    qty.append(minus, input, plus);
+
+    const sum = document.createElement("p");
+    sum.className = "item-sum";
+    card.appendChild(qty);
+
+    if (!product.once) {
+      const presets = document.createElement("div");
+      presets.className = "presets";
+      [10, 25, 50, 100].forEach(function (amount) {
+        const preset = document.createElement("button");
+        preset.type = "button";
+        preset.className = "preset";
+        preset.dataset.preset = String(amount);
+        preset.dataset.qty = product.id;
+        preset.textContent = String(amount);
+        presets.appendChild(preset);
+      });
+      card.appendChild(presets);
+    }
+
+    card.appendChild(sum);
+    grid.appendChild(card);
+    syncProduct(company, product, null);
+  });
+}
+
+function renderCart(company) {
+  const rows = document.getElementById("cart-rows");
+  rows.replaceChildren();
+  company.products.forEach(function (product) {
+    if (qtyOf(company.id, product.id) > 0) ensureCartRow(company, product);
+  });
+  renderCartOptions(company);
+  updateCartSummary(company);
+}
+
+function renderCartOptions(company) {
+  const root = document.getElementById("cart-options");
+  root.replaceChildren();
+  if (company.delivery) {
+    root.appendChild(optionBox("delivery", "1", company.delivery.name + " · " + money.format(company.delivery.price), company.delivery.detail, deliveryOn(company)));
+  }
+  if (company.flags) {
+    const bag = ensureBag(company.id);
+    company.flags.forEach(function (flag) {
+      root.appendChild(optionBox("flag", flag.id, flag.name, flag.detail, Boolean(bag.flags[flag.id])));
+    });
+  }
+}
+
+function optionBox(kind, id, title, detail, checked) {
+  const label = document.createElement("label");
+  label.className = "cart-option";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = checked;
+  if (kind === "delivery") input.dataset.delivery = id;
+  else input.dataset.flag = id;
+  const text = document.createElement("span");
+  const name = document.createElement("strong");
+  name.textContent = title;
+  text.appendChild(name);
+  if (detail) {
+    const small = document.createElement("small");
+    small.textContent = detail;
+    text.appendChild(small);
+  }
+  label.append(input, text);
+  return label;
+}
+
+function syncProduct(company, product, source) {
+  const card = document.querySelector('.product[data-product="' + product.id + '"]');
+  if (!card) return;
+  const qty = qtyOf(company.id, product.id);
+  const input = card.querySelector("input");
+  if (input !== source || product.once) input.value = qty > 0 ? String(qty) : "";
+  card.classList.toggle("is-selected", qty > 0);
+  const price = unitPrice(company, product);
+  card.querySelector(".item-sum").textContent = qty > 0 ? money.format(qty * price) : "";
+  card.querySelectorAll(".preset").forEach(function (preset) {
+    preset.classList.toggle("is-on", Number(preset.dataset.preset) === qty);
+  });
+  const chosen = sheetChoice(company, product);
+  card.querySelectorAll(".variant").forEach(function (variant) {
+    variant.classList.toggle("is-on", chosen && Number(variant.dataset.sheets) === chosen.count);
+  });
+}
+
+function ensureCartRow(company, product) {
+  const rows = document.getElementById("cart-rows");
+  let row = rows.querySelector('[data-row="' + product.id + '"]');
+  if (!row) {
+    row = document.createElement("div");
+    row.className = "cart-row";
+    row.dataset.row = product.id;
+    const title = document.createElement("strong");
+    title.textContent = lineLabel(company, product);
+    const formula = document.createElement("p");
+    formula.className = "row-formula";
+    const sum = document.createElement("p");
+    sum.className = "row-sum";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "text-btn";
+    remove.dataset.remove = product.id;
+    remove.textContent = "Убрать";
+    row.append(title, formula, sum, remove);
+    rows.appendChild(row);
+  }
+  const qty = qtyOf(company.id, product.id);
+  const price = unitPrice(company, product);
+  row.querySelector("strong").textContent = lineLabel(company, product);
+  row.querySelector(".row-formula").textContent = product.once
+    ? "весь тираж · " + money.format(price)
+    : qty + " × " + money.format(price);
+  row.querySelector(".row-sum").textContent = money.format(qty * price);
+}
+
+function setSheets(productId, count) {
+  const company = companyById(activeCompanyId);
+  if (!company) return;
+  const product = productById(company, productId);
+  if (!product) return;
+  ensureBag(company.id).sheets[productId] = count;
+  saveState();
+  syncProduct(company, product, null);
+  syncCartRow(company, product);
+  updateCartSummary(company);
+  refreshCompanyMeta(company);
+  renderBudget();
+}
+
+function setDelivery(on) {
+  const company = companyById(activeCompanyId);
+  if (!company) return;
+  ensureBag(company.id).delivery = on;
+  saveState();
+  updateCartSummary(company);
+  refreshCompanyMeta(company);
+  renderBudget();
+}
+
+function setFlag(flagId, on) {
+  const company = companyById(activeCompanyId);
+  if (!company) return;
+  ensureBag(company.id).flags[flagId] = on;
+  saveState();
+  updateCartSummary(company);
+  refreshCompanyMeta(company);
+  renderBudget();
+}
+
+function syncCartRow(company, product) {
+  const qty = qtyOf(company.id, product.id);
+  const rows = document.getElementById("cart-rows");
+  const row = rows.querySelector('[data-row="' + product.id + '"]');
+  if (qty <= 0) {
+    if (row) row.remove();
+    return;
+  }
+  ensureCartRow(company, product);
+}
+
+function updateCartSummary(company) {
+  const totals = companyTotal(company);
+  document.getElementById("cart-empty").hidden = totals.count > 0;
+  document.getElementById("cart-total").textContent = "Итого: " + money.format(totals.sum);
+  const flagNote = document.getElementById("cart-flag-note");
+  const flags = activeFlags(company);
+  if (!flags.length) {
+    flagNote.hidden = true;
+    flagNote.textContent = "";
+    return;
+  }
+  flagNote.hidden = false;
+  flagNote.textContent = flags.map(function (flag) { return flag.name + " в сумму не входит."; }).join(" ");
+}
+
+function buildSummaryText() {
+  const lines = ["Подарки сотрудникам", ""];
+  COMPANIES.forEach(function (company) {
+    const totals = companyTotal(company);
+    lines.push(company.name);
+    if (!totals.count) {
+      lines.push("— ничего не выбрано");
+    } else {
+      company.products.forEach(function (product) {
+        const qty = qtyOf(company.id, product.id);
+        if (qty <= 0) return;
+        const price = unitPrice(company, product);
+        if (product.once) {
+          lines.push("• " + lineLabel(company, product) + " — весь тираж " + money.format(price));
+        } else {
+          lines.push("• " + lineLabel(company, product) + " — " + qty + " × " + money.format(price) + " = " + money.format(qty * price));
+        }
+      });
+      if (totals.delivery) {
+        lines.push("• " + company.delivery.name + " — " + money.format(company.delivery.price));
+      }
+      activeFlags(company).forEach(function (flag) {
+        lines.push("• " + flag.name + " — цену уточнить, в сумму не входит");
+      });
+      lines.push("Итого: " + money.format(totals.sum));
+      if (company.notes && company.notes.length) {
+        lines.push("Условия:");
+        company.notes.forEach(function (note) { lines.push("— " + note); });
+      }
+    }
+    lines.push("");
+  });
+  lines.push("Общий бюджет: " + money.format(grandTotal()));
+  return lines.join("\n");
+}
+
+function copySummary() {
+  const text = buildSummaryText();
+  const button = document.getElementById("copy-all");
+  function done() {
+    button.textContent = "Скопировано";
+    setTimeout(function () { button.textContent = "Скопировать сводку"; }, 1600);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text); done(); });
+    return;
+  }
+  fallbackCopy(text);
+  done();
+}
+
+function fallbackCopy(text) {
+  const area = document.createElement("textarea");
+  area.value = text;
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand("copy");
+  area.remove();
+}
+
+shop.addEventListener("input", function (event) {
+  const input = event.target.closest("[data-qty]");
+  if (!input || input.tagName !== "INPUT") return;
+  setQty(input.dataset.qty, input.value, input);
+});
+
+shop.addEventListener("click", function (event) {
+  const step = event.target.closest("[data-step]");
+  if (step) {
+    const productId = step.dataset.qty;
+    const current = qtyOf(activeCompanyId, productId);
+    const next = Math.max(0, current + Number(step.dataset.step));
+    setQty(productId, next, null);
+    return;
+  }
+  const preset = event.target.closest("[data-preset]");
+  if (preset) {
+    setQty(preset.dataset.qty, preset.dataset.preset, null);
+    return;
+  }
+  const variant = event.target.closest("[data-sheets]");
+  if (variant) {
+    setSheets(variant.dataset.product, Number(variant.dataset.sheets));
+    return;
+  }
+  const remove = event.target.closest("[data-remove]");
+  if (remove) setQty(remove.dataset.remove, 0, null);
+});
+
+document.getElementById("shop-close").addEventListener("click", function () {
+  shop.close();
+});
+
+shop.addEventListener("click", function (event) {
+  if (event.target === shop) shop.close();
+});
+
+shop.addEventListener("close", function () {
+  document.body.classList.remove("modal-open");
+  activeCompanyId = null;
+  renderBudget();
+  COMPANIES.forEach(refreshCompanyMeta);
+});
+
+document.getElementById("clear-cart").addEventListener("click", function () {
+  const button = document.getElementById("clear-cart");
+  if (!clearArmed) {
+    clearArmed = true;
+    button.textContent = "Точно очистить?";
+    setTimeout(function () {
+      clearArmed = false;
+      if (shop.open) button.textContent = "Очистить";
+    }, 2200);
+    return;
+  }
+  clearArmed = false;
+  button.textContent = "Очистить";
+  const company = companyById(activeCompanyId);
+  if (!company) return;
+  state[company.id] = { items: {}, sheets: {}, delivery: false, flags: {} };
+  saveState();
+  renderProducts(company);
+  renderCart(company);
+  refreshCompanyMeta(company);
+  renderBudget();
+});
+
+document.getElementById("cart-options").addEventListener("change", function (event) {
+  const input = event.target;
+  if (input.dataset.delivery) setDelivery(input.checked);
+  if (input.dataset.flag) setFlag(input.dataset.flag, input.checked);
+});
+
+document.getElementById("copy-all").addEventListener("click", copySummary);
+
+spawnSnow();
+renderCompanies();
+renderBudget();
