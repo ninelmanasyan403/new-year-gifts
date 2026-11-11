@@ -750,10 +750,12 @@ function pigSvg(outfit) {
       '<circle cx="114" cy="90" r="8" fill="#7eb6d9" stroke="#e3b45a" stroke-width="2"/>' +
       '<path d="M22 86c3 1 6 0 8-2" fill="none" stroke="#fff" stroke-width="1.4" opacity="0.8"/>' +
       '<path d="M110 86c3 1 6 0 8-2" fill="none" stroke="#fff" stroke-width="1.4" opacity="0.8"/>';
-  } else if (outfit === "starhat") {
-    front = '<path d="M40 64c8-38 60-42 72-6-8 6-18 4-26-2-8 12-34 14-46 8z" fill="#f7f4ef"/>' +
-      '<ellipse cx="72" cy="64" rx="30" ry="7" fill="#7eb6d9"/>' +
-      '<polygon points="108,22 111,32 122,32 113,39 116,50 108,43 100,50 103,39 94,32 105,32" fill="#e3b45a"/>';
+  } else if (outfit === "party") {
+    front = '<path d="M40 64 L48 34 L60 52 L70 26 L80 52 L92 34 L100 64 Z" fill="#e3b45a"/>' +
+      '<circle cx="48" cy="34" r="4" fill="#d4536a"/>' +
+      '<circle cx="70" cy="26" r="4.5" fill="#d4536a"/>' +
+      '<circle cx="92" cy="34" r="4" fill="#2f6b4f"/>' +
+      '<rect x="40" y="60" width="60" height="8" rx="3" fill="#e3b45a"/>';
   }
   return '<svg class="pig-svg" viewBox="0 0 140 156">' +
     behind +
@@ -910,7 +912,7 @@ function burstHearts(button) {
 
 function bindOink() {
   var button = document.getElementById("oink-pig");
-  button.insertAdjacentHTML("afterbegin", pigSvg("starhat"));
+  button.insertAdjacentHTML("afterbegin", pigSvg("party"));
   button.addEventListener("click", function () {
     button.classList.remove("is-glowing");
     void button.offsetWidth;
