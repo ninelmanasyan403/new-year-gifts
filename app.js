@@ -719,21 +719,41 @@ function pigSvg(outfit) {
     front = '<path d="M36 64c6-34 58-48 78-16 2 8-18 8-24 2-6 16-40 16-54 14z" fill="#d4536a"/>' +
       '<ellipse cx="72" cy="66" rx="34" ry="8" fill="#fff"/>' +
       '<circle cx="112" cy="44" r="9" fill="#fff"/>';
-  } else if (outfit === "scarf") {
-    behind = '<path d="M78 108c10 4 16 22 8 40" fill="none" stroke="#2f6b4f" stroke-width="10" stroke-linecap="round"/>' +
-      '<circle cx="84" cy="146" r="5" fill="#e3b45a"/>';
-    front = '<path d="M30 98h80c-4 8-14 12-26 12H54c-12 0-20-4-24-12z" fill="#2f6b4f"/>' +
-      '<path d="M46 104h18" stroke="#e3b45a" stroke-width="3" stroke-linecap="round"/>';
+  } else if (outfit === "elf") {
+    front = '<path d="M46 60 L70 12 L94 60 Z" fill="#2f6b4f"/>' +
+      '<ellipse cx="70" cy="60" rx="28" ry="7" fill="#e3b45a"/>' +
+      '<circle cx="70" cy="12" r="6" fill="#d4536a"/>';
+    behind = '<path d="M36 134c8 3 14 5 34 5s26-2 34-5v8c-8 8-20 12-34 12s-26-4-34-12z" fill="#2f6b4f"/>' +
+      '<circle cx="70" cy="140" r="3" fill="#e3b45a"/>';
   } else if (outfit === "sweater") {
-    behind = '<path d="M30 134c8 3 16 5 40 5s32-2 40-5v14c-10 10-24 14-40 14s-30-4-40-14z" fill="#7dcea0"/>' +
-      '<path d="M70 146l2 3.4 3.8.5-3 2.6.8 3.8-3.6-2.2-3.6 2.2.8-3.8-3-2.6 3.8-.5z" fill="#fff"/>';
-  } else if (outfit === "bow") {
-    front = '<path d="M96 50c8-12 22-8 22 2s-14 12-22 2c-8 10-22 8-22-2s14-14 22-2z" fill="#d4536a"/>' +
-      '<circle cx="96" cy="52" r="4" fill="#f2c14e"/>';
-  } else if (outfit === "muffs") {
-    front = '<path d="M38 62c12-16 52-16 64 0" fill="none" stroke="#e3b45a" stroke-width="5" stroke-linecap="round"/>' +
-      '<circle cx="36" cy="68" r="11" fill="#f48fa3" stroke="#fff" stroke-width="4"/>' +
-      '<circle cx="104" cy="68" r="11" fill="#f48fa3" stroke="#fff" stroke-width="4"/>';
+    behind = '<path d="M30 134c8 3 16 5 40 5s32-2 40-5v14c-10 10-24 14-40 14s-30-4-40-14z" fill="#d4536a"/>' +
+      '<path d="M70 144l2 3.2 3.6.4-2.8 2.4.7 3.6-3.5-2-3.5 2 .7-3.6-2.8-2.4 3.6-.4z" fill="#fff"/>' +
+      '<circle cx="52" cy="148" r="2.2" fill="#e3b45a"/>' +
+      '<circle cx="88" cy="148" r="2.2" fill="#7dcea0"/>';
+  } else if (outfit === "antlers") {
+    front = '<path d="M34 52c-16-6-20-24-8-28 3 8 7 12 14 14" fill="none" stroke="#8d5a32" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M106 52c16-6 20-24 8-28-3 8-7 12-14 14" fill="none" stroke="#8d5a32" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M30 46c-8-8 2-16 8-8" fill="none" stroke="#8d5a32" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M110 46c8-8-2-16-8-8" fill="none" stroke="#8d5a32" stroke-width="3" stroke-linecap="round"/>';
+    behind = '<path d="M34 134c8 3 14 5 36 5s28-2 36-5v10c-8 8-22 12-36 12s-28-4-36-12z" fill="#d4536a"/>' +
+      '<path d="M56 140h12" stroke="#e3b45a" stroke-width="2.4" stroke-linecap="round"/>';
+  } else if (outfit === "treehat") {
+    front = '<polygon points="70,4 88,28 78,28 96,50 44,50 62,28 52,28" fill="#2f6b4f"/>' +
+      '<circle cx="70" cy="20" r="3.2" fill="#e3b45a"/>' +
+      '<circle cx="60" cy="36" r="3.2" fill="#d4536a"/>' +
+      '<circle cx="80" cy="40" r="3.2" fill="#7eb6d9"/>' +
+      '<polygon points="70,0 73,7 70,5 67,7" fill="#f2c14e"/>';
+  } else if (outfit === "baubles") {
+    front = '<path d="M34 70c-6 6-8 14-4 16" fill="none" stroke="#e3b45a" stroke-width="1.6"/>' +
+      '<path d="M106 70c6 6 8 14 4 16" fill="none" stroke="#e3b45a" stroke-width="1.6"/>' +
+      '<circle cx="26" cy="90" r="8" fill="#d4536a" stroke="#e3b45a" stroke-width="2"/>' +
+      '<circle cx="114" cy="90" r="8" fill="#7eb6d9" stroke="#e3b45a" stroke-width="2"/>' +
+      '<path d="M22 86c3 1 6 0 8-2" fill="none" stroke="#fff" stroke-width="1.4" opacity="0.8"/>' +
+      '<path d="M110 86c3 1 6 0 8-2" fill="none" stroke="#fff" stroke-width="1.4" opacity="0.8"/>';
+  } else if (outfit === "starhat") {
+    front = '<path d="M40 64c8-38 60-42 72-6-8 6-18 4-26-2-8 12-34 14-46 8z" fill="#f7f4ef"/>' +
+      '<ellipse cx="72" cy="64" rx="30" ry="7" fill="#7eb6d9"/>' +
+      '<polygon points="108,22 111,32 122,32 113,39 116,50 108,43 100,50 103,39 94,32 105,32" fill="#e3b45a"/>';
   }
   return '<svg class="pig-svg" viewBox="0 0 140 156">' +
     behind +
@@ -756,15 +776,46 @@ function pigSvg(outfit) {
     "</svg>";
 }
 
+function treeSvg() {
+  return '<svg viewBox="0 0 80 112">' +
+    '<polygon points="40,6 64,40 54,40 72,68 58,68 78,102 2,102 22,68 8,68 26,40 16,40" fill="#2f6b4f"/>' +
+    '<rect x="33" y="102" width="14" height="10" rx="2" fill="#8a5a3a"/>' +
+    '<circle cx="40" cy="34" r="4" fill="#e3b45a"/>' +
+    '<circle cx="30" cy="56" r="4" fill="#d4536a"/>' +
+    '<circle cx="52" cy="78" r="4.5" fill="#7eb6d9"/>' +
+    '<polygon points="40,0 43,8 40,6 37,8" fill="#f2c14e"/>' +
+    "</svg>";
+}
+
+function baubleSvg(color) {
+  return '<svg viewBox="0 0 40 56">' +
+    '<rect x="16" y="2" width="8" height="8" rx="2" fill="#c9a24a"/>' +
+    '<circle cx="20" cy="32" r="16" fill="' + color + '"/>' +
+    '<path d="M12 26c4 2 8 2 14-4" fill="none" stroke="#fff" stroke-width="2" opacity="0.75"/>' +
+    "</svg>";
+}
+
 function spawnPigs() {
   var scene = document.getElementById("pig-scene");
   var pigs = [
     { outfit: "santa", style: "left:1%; top:14%; --tilt:-8deg;" },
-    { outfit: "scarf", style: "right:1%; top:28%; --tilt:8deg; animation-delay:-1.4s;", size: "wide" },
+    { outfit: "elf", style: "right:1%; top:22%; --tilt:8deg; animation-delay:-1.4s;" },
     { outfit: "sweater", style: "left:2%; bottom:6%; --tilt:-4deg; animation-delay:-2.2s;" },
-    { outfit: "bow", style: "right:3%; bottom:10%; --tilt:7deg; animation-delay:-3s;", size: "small" },
-    { outfit: "muffs", style: "left:16%; top:4%; --tilt:-10deg; animation-delay:-0.8s;", size: "small" },
-    { outfit: "santa", style: "right:18%; top:2%; --tilt:6deg; animation-delay:-2.8s;", size: "small" }
+    { outfit: "antlers", style: "right:2%; bottom:8%; --tilt:7deg; animation-delay:-3s;" },
+    { outfit: "treehat", style: "left:15%; top:2%; --tilt:-10deg; animation-delay:-0.8s;", size: "small" },
+    { outfit: "baubles", style: "right:16%; top:2%; --tilt:6deg; animation-delay:-2.8s;", size: "small" }
+  ];
+  var trees = [
+    { style: "left:7%; top:48%; width:72px; animation-delay:-1s;" },
+    { style: "right:6%; top:46%; width:84px; animation-delay:-2.4s;" },
+    { style: "left:24%; bottom:2%; width:52px; animation-delay:-0.6s;" }
+  ];
+  var baubles = [
+    { color: "#d4536a", style: "left:12%; top:32%; width:28px; animation-delay:-1.3s;" },
+    { color: "#e3b45a", style: "right:13%; top:38%; width:34px; animation-delay:-2s;" },
+    { color: "#7eb6d9", style: "left:27%; top:10%; width:22px; animation-delay:-0.4s;" },
+    { color: "#d4536a", style: "right:24%; bottom:16%; width:26px; animation-delay:-2.8s;" },
+    { color: "#7dcea0", style: "left:9%; bottom:20%; width:24px; animation-delay:-1.6s;" }
   ];
   var hearts = [
     { style: "left:10%; top:42%; font-size:22px;" },
@@ -787,6 +838,20 @@ function spawnPigs() {
     node.className = "deco-pig" + (pig.size ? " " + pig.size : "");
     node.style.cssText = pig.style;
     node.innerHTML = pigSvg(pig.outfit);
+    scene.appendChild(node);
+  });
+  trees.forEach(function (tree) {
+    var node = document.createElement("div");
+    node.className = "deco-tree";
+    node.style.cssText = tree.style;
+    node.innerHTML = treeSvg();
+    scene.appendChild(node);
+  });
+  baubles.forEach(function (bauble) {
+    var node = document.createElement("div");
+    node.className = "deco-bauble";
+    node.style.cssText = bauble.style;
+    node.innerHTML = baubleSvg(bauble.color);
     scene.appendChild(node);
   });
   hearts.forEach(function (heart) {
@@ -845,7 +910,7 @@ function burstHearts(button) {
 
 function bindOink() {
   var button = document.getElementById("oink-pig");
-  button.insertAdjacentHTML("afterbegin", pigSvg("santa"));
+  button.insertAdjacentHTML("afterbegin", pigSvg("starhat"));
   button.addEventListener("click", function () {
     button.classList.remove("is-glowing");
     void button.offsetWidth;

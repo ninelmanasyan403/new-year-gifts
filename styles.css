@@ -120,13 +120,6 @@ h1 {
   line-height: 0.95;
 }
 
-.lede {
-  margin: 8px auto 0;
-  max-width: 560px;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.35;
-}
 
 main {
   max-width: 1080px;
@@ -560,6 +553,16 @@ dialog::backdrop {
 .deco-pig.small { width: 92px; }
 .deco-pig.wide { width: 150px; }
 
+.deco-tree,
+.deco-bauble {
+  position: absolute;
+  filter: drop-shadow(0 8px 10px rgba(120, 62, 78, 0.14));
+  animation: heart-float 6.4s ease-in-out infinite;
+}
+
+.deco-tree svg,
+.deco-bauble svg { display: block; width: 100%; height: auto; }
+
 @keyframes pig-sway {
   0%, 100% { transform: rotate(var(--tilt, -6deg)) translateY(0); }
   50% { transform: rotate(calc(var(--tilt, -6deg) + 6deg)) translateY(-8px); }
@@ -581,11 +584,11 @@ dialog::backdrop {
 }
 
 .oink-pig {
-  position: fixed;
-  right: 22px;
-  bottom: 16px;
+  position: relative;
+  display: block;
+  margin: 2px auto 0;
   z-index: 4;
-  width: 148px;
+  width: 112px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -701,7 +704,7 @@ dialog::backdrop {
 }
 
 @media (max-height: 760px) {
-  .lede { display: none; }
+  .oink-pig { width: 88px; }
   .company img { height: clamp(72px, 16vh, 120px); }
   .companies h2 { margin: 4px 0; }
 }
@@ -712,7 +715,7 @@ dialog::backdrop {
   .shop-layout { grid-template-columns: 1fr; }
   .shop-cart { border-left: 0; border-top: 1px solid var(--line); }
   .shop-head h2 { font-size: 28px; }
-  .oink-pig { width: 92px; right: 10px; bottom: 10px; }
+  .oink-pig { width: 88px; }
 }
 
 @media (max-width: 720px) {
